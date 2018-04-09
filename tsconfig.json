@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "outDir": "lib",
+        "alwaysStrict": true,
+        "allowUnreachableCode": false,
+        "strict": true,
+        "sourceMap": true,
+        "declaration": true,
+        "noImplicitAny": true,
+        "module": "none",
+        "lib": [
+            "dom", "es5"
+        ]
+    },
+    "files": [
+        "src/guijarro.ts"
+    ]
+}

@@ -1,0 +1,7 @@
+[
+    {"type": "css", "module":"guijarro"},
+    {"type": "css", "href":"https://openlayers.org/en/v4.6.5/css/ol.css"},
+    {"type": "js" , "src":"https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"},
+    {"type": "js" , "src":"https://openlayers.org/en/v4.6.5/build/ol.js"},
+    {"type": "js" , "src":"lib/guijarro.js", "module":"guijarro"}
+]
