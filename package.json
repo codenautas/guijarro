@@ -1,8 +1,8 @@
-    {
+{
     "name": "guijarro",
-    "version": "0.1.0",
-    "main":"lib/guijarro.js",
-    "types":"lib/guijarro.d.ts",
+    "version": "0.1.1",
+    "main": "lib/guijarro.js",
+    "types": "lib/guijarro.d.ts",
     "dependencies": {
         "@types/openlayers": "~4.6.7",
         "openlayers": "~4.6.5"

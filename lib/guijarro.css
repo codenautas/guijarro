@@ -36,3 +36,25 @@ div#footer {
 #aviso_gps{
     color: gray;
 }
+.ubicate-control-Y {
+    top: 65px;
+    left: .5em;
+}
+.ol-touch .ubicate-control-Y {
+    top: 80px;
+}
+.ubicate-control-Z {
+    top: 95px;
+    left: .5em;
+}
+.ol-touch .ubicate-control-Z {
+    top: 130px;
+}
+.ubicate-control-C {
+    top: 125px;
+    left: .5em;
+}
+.ol-touch .ubicate-control-C {
+    top: 180px;
+}
+  
