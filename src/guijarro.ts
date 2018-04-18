@@ -5,7 +5,7 @@ type Nodo={
     timestamp:number
 }
 
-function guijarro(targetDiv:string):{
+function guijarro(targetDiv:string, centerZone?:[number,number]):{
     addMark:(lat:number,long:number,abr:string,title:string, template?:any)=>void
     addLayer:(url:string, stlye?:any)=>void
     posiciones:Nodo[]
@@ -35,6 +35,8 @@ function guijarro(targetDiv:string):{
         labelAlign: "lt"
     };
 
+    var posiciones:Nodo[]=[];
+
     var projectionCoor = ol.proj.get('EPSG:4326');
     var projectionView = ol.proj.get('EPSG:3857');
 
@@ -51,8 +53,8 @@ function guijarro(targetDiv:string):{
             color: 'rgba(255, 255, 255, 0.2)'
         }),
         stroke: new ol.style.Stroke({
-            color: '#319FD3',
-            width: 1
+            color: '#E3193F',
+            width: 3
         }),
         text: new ol.style.Text({
             font: '12px Calibri,sans-serif',
@@ -66,13 +68,67 @@ function guijarro(targetDiv:string):{
         })
     });
 
+    var center = latLon(-34.625, -58.445); 
+
     var view = new ol.View({
         projection: projectionView,
-        center: latLon(-34.625, -58.445),
+        center,
         zoom: 12
     })
 
+    var ubicateInZone = function(){
+        view.setCenter(centerZone||center);
+    }
+
+    function UbicateControl(opt_options:{letter:string, position:string, zoom:number|null}) {
+        var options = opt_options || {};
+        var button = document.createElement('button');
+        button.textContent = opt_options.letter;
+      
+        var this_ = this;
+        var handleUbicate = function(e) {
+            this_.getMap().getView().setRotation(0);
+            if(opt_options.zoom){
+                view.setZoom(opt_options.zoom);
+            }
+            if(opt_options.position=='current'){
+                geolocation.setTracking(true);
+                if (posiciones.length) {
+                    var coordinates = posiciones[posiciones.length - 1].coordinates;
+                    view.setCenter(coordinates);
+                }
+            }else if(opt_options.position=='center'){
+                view.setCenter(center);
+            }else{
+                ubicateInZone();
+            }
+        };
+      
+        button.addEventListener('click', handleUbicate, false);
+        button.addEventListener('touchstart', handleUbicate, false);
+      
+        var element = document.createElement('div');
+        element.className = 'ol-unselectable ol-control ubicate-control-'+opt_options.letter;
+        element.appendChild(button);
+      
+        ol.control.Control.call(this, {
+            element: element,
+            target: options.target
+        });
+      
+    };
+    ol.inherits(UbicateControl, ol.control.Control);
+
     var map = new ol.Map({
+        controls: ol.control.defaults({
+            attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+                collapsible: false
+            })
+        }).extend([
+            new UbicateControl({letter:'Y', position:'current', zoom:null}),
+            new UbicateControl({letter:'Z', position:'zone'   , zoom:14  }),
+            new UbicateControl({letter:'C', position:'center' , zoom:12  }),
+        ]),
         layers:[baseMap],
         target:targetDiv,
         view:view
@@ -104,35 +160,6 @@ function guijarro(targetDiv:string):{
         return document.getElementById(id)!;
     }
 
-    window.addEventListener('load', function(){
-        eid('gps_confirm').addEventListener('change', function() {
-            var gps_encendido=(this as HTMLInputElement).checked
-            var aviso_gps=eid('aviso_gps');
-            if(gps_encendido){
-                aviso_gps.innerHTML = aviso_gps.innerHTML.replace(/\bserán\b/g,'son');
-                aviso_gps.style.color='black'
-            }else{
-                aviso_gps.innerHTML = aviso_gps.innerHTML.replace(/\bson\b/g,'serán');
-                aviso_gps.style.color='gray'
-            }
-            geolocation.setTracking(gps_encendido);
-        });    
-        var aux = localStorage.getItem("mapa-posiciones");
-        if(aux != null){
-            posiciones=JSON.parse(aux);
-        }
-        posiciones.forEach(function(nodo){
-            colocarNodo(nodo);
-        })
-        document.querySelectorAll('h2')[0].addEventListener('click',function(){
-            if(posiciones.length){
-                var coordinates=posiciones[posiciones.length-1].coordinates;
-                view.setCenter(coordinates);
-            }
-        });
-
-    })
-
     function posi(posicion:number, array:any):number | null{
         if(array == null){
             return null;
@@ -142,21 +169,19 @@ function guijarro(targetDiv:string):{
         return x as number;
     }
 
-    var posiciones:Nodo[]=[];
-
     var ultimaPosicion:[number, number];
 
     function colocarNodo(nodo:Nodo){
         var positionFeature = new ol.Feature();
         positionFeature.setStyle(new ol.style.Style({
             image: new ol.style.Circle({
-                radius: 5,
+                radius: 4,
                 fill: new ol.style.Fill({
-                    color: '#99CC33'
+                    color: '#6688DDFF',
                 }),
                 stroke: new ol.style.Stroke({
-                    color: '#fa0',
-                    width: 2
+                    color: '#0055FF',
+                    width: 1
                 })
             })
         }));
@@ -169,20 +194,17 @@ function guijarro(targetDiv:string):{
         });
     }
 
-    function posicionGPS(orden:number){
-        if(orden){
-            var coordinates = geolocation.getPosition();
-            if(coordinates != null){
-                ultimaPosicion = ol.proj.transform(coordinates,projectionView,projectionCoor);
-                if(posiciones.length){
-                    colocarNodo(posiciones[posiciones.length-1]);
-                }
-                var nodo = {posicion:ultimaPosicion, coordinates:coordinates, timestamp:new Date().getTime()};
-                posiciones.push(nodo);
-                localStorage.setItem("mapa-posiciones",JSON.stringify(posiciones));
+    function posicionGPS(){
+        var coordinates = geolocation.getPosition();
+        if(coordinates != null){
+            ultimaPosicion = ol.proj.transform(coordinates,projectionView,projectionCoor);
+            if(posiciones.length){
+                colocarNodo(posiciones[posiciones.length-1]);
             }
+            var nodo = {posicion:ultimaPosicion, coordinates:coordinates, timestamp:new Date().getTime()};
+            posiciones.push(nodo);
+            localStorage.setItem("mapa-posiciones",JSON.stringify(posiciones));
         }
-        return ultimaPosicion==null?null:ultimaPosicion[orden];
     }
 
     function cantidadGPS(){
@@ -191,7 +213,7 @@ function guijarro(targetDiv:string):{
 
     var accuracyFeature = new ol.Feature();
     geolocation.on('change:accuracyGeometry', function() {
-    accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
+        accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
     });
 
     var positionFeature = new ol.Feature();
@@ -215,6 +237,10 @@ function guijarro(targetDiv:string):{
         }
     });
 
+    geolocation.on('change', function () {
+        posicionGPS();
+    });
+
     new ol.layer.Vector({
         map: map,
         source: new ol.source.Vector({
@@ -223,17 +249,26 @@ function guijarro(targetDiv:string):{
     });
 
     function addLayer(url:string, stlye?:any):void{
-        new ol.layer.Vector({
-            map: map,
-            source: new ol.source.Vector({
-                url: url,
-                format: new ol.format.KML({
-                    extractStyles: false
-                })
-            }),
-            style: style
-        })
+        let source = new ol.source.Vector({
+            url,
+            format: new ol.format.KML({
+                extractStyles: false
+            })
+        });
+        let vector = new ol.layer.Vector({map, source, style})
+        ubicateInZone = function(){
+            var extent = source.getExtent();
+            view.setCenter(ol.extent.getCenter(extent));
+        }
     }
+
+    var aux = localStorage.getItem("mapa-posiciones");
+    if(aux != null){
+        posiciones=JSON.parse(aux);
+    }
+    posiciones.forEach(function(nodo){
+        colocarNodo(nodo);
+    })
 
     return {addMark:mark, addLayer, posiciones:posiciones};
 }
