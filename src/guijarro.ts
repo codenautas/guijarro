@@ -1,8 +1,14 @@
 /// /// <reference types="ol" />
+type Nodo={
+    posicion:[number,number]
+    coordinates:[number,number]
+    timestamp:number
+}
 
 function guijarro(targetDiv:string):{
     addMark:(lat:number,long:number,abr:string,title:string, template?:any)=>void
     addLayer:(url:string, stlye?:any)=>void
+    posiciones:Nodo[]
 }{
 
     var template = {
@@ -136,12 +142,6 @@ function guijarro(targetDiv:string):{
         return x as number;
     }
 
-    type Nodo={
-        posicion:[number,number]
-        coordinates:[number,number]
-        timestamp:number
-    }
-
     var posiciones:Nodo[]=[];
 
     var ultimaPosicion:[number, number];
@@ -235,6 +235,6 @@ function guijarro(targetDiv:string):{
         })
     }
 
-    return {addMark:mark, addLayer};
+    return {addMark:mark, addLayer, posiciones:posiciones};
 }
 
