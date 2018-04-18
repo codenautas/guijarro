@@ -1,6 +1,6 @@
 {
     "name": "guijarro",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "main": "lib/guijarro.js",
     "types": "lib/guijarro.d.ts",
     "dependencies": {
