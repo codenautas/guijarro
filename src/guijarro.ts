@@ -48,7 +48,7 @@ function guijarro(targetDiv:string, centerZone?:[number,number]):{
         source: new ol.source.OSM()
     });
 
-    var style = new ol.style.Style({
+    var globalKmlStyle = new ol.style.Style({
         fill: new ol.style.Fill({
             color: 'rgba(255, 255, 255, 0.2)'
         }),
@@ -134,9 +134,9 @@ function guijarro(targetDiv:string, centerZone?:[number,number]):{
         view:view
     });
 
-    function mark(lat:number,long:number,abr:string,title:string, template?:any){
+    function mark(lat:number,long:number,abr:string,title:string, className?:string){
         var element = document.createElement("div");
-        element.className="mark";
+        element.className=className||"mark";
         var line1 = document.createElement("div");
         line1.innerText=abr;
         var line2 = document.createElement("div");
@@ -248,14 +248,14 @@ function guijarro(targetDiv:string, centerZone?:[number,number]):{
         })
     });
 
-    function addLayer(url:string, stlye?:any):void{
+    function addLayer(url:string, style?:ol.style.Style):void{
         let source = new ol.source.Vector({
             url,
             format: new ol.format.KML({
                 extractStyles: false
             })
         });
-        let vector = new ol.layer.Vector({map, source, style})
+        let vector = new ol.layer.Vector({map, source, style:style || globalKmlStyle})
         ubicateInZone = function(){
             var extent = source.getExtent();
             view.setCenter(ol.extent.getCenter(extent));
