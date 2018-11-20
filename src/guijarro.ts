@@ -80,44 +80,47 @@ function guijarro(targetDiv:string, centerZone?:[number,number]):{
         view.setCenter(centerZone||center);
     }
 
-    function UbicateControl(opt_options:{letter:string, position:string, zoom:number|null}) {
-        var options = opt_options || {};
-        var button = document.createElement('button');
-        button.textContent = opt_options.letter;
-      
-        var this_ = this;
-        var handleUbicate = function(e) {
-            this_.getMap().getView().setRotation(0);
-            if(opt_options.zoom){
-                view.setZoom(opt_options.zoom);
-            }
-            if(opt_options.position=='current'){
-                geolocation.setTracking(true);
-                if (posiciones.length) {
-                    var coordinates = posiciones[posiciones.length - 1].coordinates;
-                    view.setCenter(coordinates);
+    class UbicateControl extends ol.control.Control{
+        constructor(opt_options:{letter:string, position:string, zoom:number|null, target?:any}){
+            var options = opt_options || {};
+            var button = document.createElement('button');
+            button.textContent = opt_options.letter;
+        
+            var this_:UbicateControl;
+
+            var handleUbicate = function() {
+                this_.getMap().getView().setRotation(0);
+                if(opt_options.zoom){
+                    view.setZoom(opt_options.zoom);
                 }
-            }else if(opt_options.position=='center'){
-                view.setCenter(center);
-            }else{
-                ubicateInZone();
-            }
-        };
-      
-        button.addEventListener('click', handleUbicate, false);
-        button.addEventListener('touchstart', handleUbicate, false);
-      
-        var element = document.createElement('div');
-        element.className = 'ol-unselectable ol-control ubicate-control-'+opt_options.letter;
-        element.appendChild(button);
-      
-        ol.control.Control.call(this, {
-            element: element,
-            target: options.target
-        });
-      
-    };
-    ol.inherits(UbicateControl, ol.control.Control);
+                if(opt_options.position=='current'){
+                    geolocation.setTracking(true);
+                    if (posiciones.length) {
+                        var coordinates = posiciones[posiciones.length - 1].coordinates;
+                        view.setCenter(coordinates);
+                    }
+                }else if(opt_options.position=='center'){
+                    view.setCenter(center);
+                }else{
+                    ubicateInZone();
+                }
+            };
+        
+            button.addEventListener('click', handleUbicate, false);
+            button.addEventListener('touchstart', handleUbicate, false);
+        
+            var element = document.createElement('div');
+            element.className = 'ol-unselectable ol-control ubicate-control-'+opt_options.letter;
+            element.appendChild(button);
+       
+            super({
+                element: element,
+                target: options.target
+            });
+            this_ = this;
+
+        }      
+    }
 
     var map = new ol.Map({
         controls: ol.control.defaults({
