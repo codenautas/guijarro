@@ -39,3 +39,6 @@ sessions/
 *.bak
 
 package-lock.json
+/lib/guijarro.d.ts
+/lib/guijarro.js
+/lib/guijarro.js.map

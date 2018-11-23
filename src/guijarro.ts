@@ -8,6 +8,7 @@ type Nodo={
 function guijarro(targetDiv:string, centerZone?:[number,number]):{
     addMark:(lat:number,long:number,abr:string,title:string, template?:any)=>void
     addLayer:(url:string, stlye?:any)=>void
+    colocarNodo:(nodo:Nodo)=>void
     posiciones:Nodo[]
 }{
 
@@ -273,6 +274,6 @@ function guijarro(targetDiv:string, centerZone?:[number,number]):{
         colocarNodo(nodo);
     })
 
-    return {addMark:mark, addLayer, posiciones:posiciones};
+    return {addMark:mark, addLayer, posiciones:posiciones, colocarNodo:colocarNodo};
 }
 
