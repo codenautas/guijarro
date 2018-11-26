@@ -9,6 +9,7 @@ function guijarro(targetDiv:string, centerZone?:[number,number]):{
     addMark:(lat:number,long:number,abr:string,title:string, template?:any)=>void
     addLayer:(url:string, stlye?:any)=>void
     colocarNodo:(nodo:Nodo)=>void
+    addNodo:(nodo:Nodo)=>void
     posiciones:Nodo[]
 }{
 
@@ -206,9 +207,13 @@ function guijarro(targetDiv:string, centerZone?:[number,number]):{
                 colocarNodo(posiciones[posiciones.length-1]);
             }
             var nodo = {posicion:ultimaPosicion, coordinates:coordinates, timestamp:new Date().getTime()};
-            posiciones.push(nodo);
-            localStorage.setItem("mapa-posiciones",JSON.stringify(posiciones));
+            addNodo(nodo);
         }
+    }
+
+    function addNodo(nodo:Nodo){
+        posiciones.push(nodo);
+        localStorage.setItem("mapa-posiciones",JSON.stringify(posiciones));
     }
 
     function cantidadGPS(){
@@ -274,6 +279,6 @@ function guijarro(targetDiv:string, centerZone?:[number,number]):{
         colocarNodo(nodo);
     })
 
-    return {addMark:mark, addLayer, posiciones:posiciones, colocarNodo:colocarNodo};
+    return {addMark:mark, addLayer, posiciones:posiciones, colocarNodo:colocarNodo, addNodo:addNodo};
 }
 
