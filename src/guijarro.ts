@@ -5,11 +5,21 @@ type Nodo={
     timestamp:number
 }
 
+type Opts={
+    letter:string, 
+    position:string, 
+    zoom:number|null, 
+    target?:any, 
+    handler?:()=>void, 
+    classSufix?:string
+}
+
 function guijarro(targetDiv:string, centerZone?:[number,number]):{
     addMark:(lat:number,long:number,abr:string,title:string, template?:any)=>void
     addLayer:(url:string, stlye?:any)=>void
     colocarNodo:(nodo:Nodo)=>void
     addNodo:(nodo:Nodo)=>void
+    addButton:(opts:Opts)=>void
     posiciones:Nodo[]
 }{
 
@@ -83,36 +93,36 @@ function guijarro(targetDiv:string, centerZone?:[number,number]):{
     }
 
     class UbicateControl extends ol.control.Control{
-        constructor(opt_options:{letter:string, position:string, zoom:number|null, target?:any}){
+        constructor(opt_options:Opts){
             var options = opt_options || {};
             var button = document.createElement('button');
-            button.textContent = opt_options.letter;
+            button.textContent = options.letter;
         
             var this_:UbicateControl;
 
             var handleUbicate = function() {
                 this_.getMap().getView().setRotation(0);
                 if(opt_options.zoom){
-                    view.setZoom(opt_options.zoom);
+                    view.setZoom(options.zoom);
                 }
-                if(opt_options.position=='current'){
+                if(options.position=='current'){
                     geolocation.setTracking(true);
                     if (posiciones.length) {
                         var coordinates = posiciones[posiciones.length - 1].coordinates;
                         view.setCenter(coordinates);
                     }
-                }else if(opt_options.position=='center'){
+                }else if(options.position=='center'){
                     view.setCenter(center);
                 }else{
                     ubicateInZone();
                 }
             };
         
-            button.addEventListener('click', handleUbicate, false);
-            button.addEventListener('touchstart', handleUbicate, false);
+            button.addEventListener('click', options.handler||handleUbicate, false);
+            button.addEventListener('touchstart', options.handler||handleUbicate, false);
         
             var element = document.createElement('div');
-            element.className = 'ol-unselectable ol-control ubicate-control-'+opt_options.letter;
+            element.className = 'ol-unselectable ol-control ubicate-control-'+(options.classSufix||options.letter);
             element.appendChild(button);
        
             super({
@@ -138,6 +148,13 @@ function guijarro(targetDiv:string, centerZone?:[number,number]):{
         target:targetDiv,
         view:view
     });
+
+    function addButton(opts:Opts){
+        map.controls.extend([
+            new UbicateControl(opts)
+        ]);
+
+    }
 
     function mark(lat:number,long:number,abr:string,title:string, className?:string){
         var element = document.createElement("div");
@@ -279,6 +296,6 @@ function guijarro(targetDiv:string, centerZone?:[number,number]):{
         colocarNodo(nodo);
     })
 
-    return {addMark:mark, addLayer, posiciones:posiciones, colocarNodo:colocarNodo, addNodo:addNodo};
+    return {addMark:mark, addLayer, posiciones:posiciones, colocarNodo:colocarNodo, addNodo:addNodo, addButton:addButton};
 }
 
