@@ -11,7 +11,8 @@ type Opts={
     zoom:number|null, 
     target?:any, 
     handler?:()=>void, 
-    classSufix?:string
+    classSufix?:string,
+    withTouchStartEvent?:boolean
 }
 
 function guijarro(targetDiv:string, centerZone?:[number,number]):{
@@ -94,7 +95,7 @@ function guijarro(targetDiv:string, centerZone?:[number,number]):{
 
     class UbicateControl extends ol.control.Control{
         constructor(opt_options:Opts){
-            var options = opt_options || {};
+            var options = opt_options || {withTouchStartEvent:true};
             var button = document.createElement('button');
             button.textContent = options.letter;
         
@@ -119,7 +120,9 @@ function guijarro(targetDiv:string, centerZone?:[number,number]):{
             };
         
             button.addEventListener('click', options.handler||handleUbicate, false);
-            button.addEventListener('touchstart', options.handler||handleUbicate, false);
+            if(options.withTouchStartEvent){
+                button.addEventListener('touchstart', options.handler||handleUbicate, false);
+            }
         
             var element = document.createElement('div');
             element.className = 'ol-unselectable ol-control ubicate-control-'+(options.classSufix||options.letter);
