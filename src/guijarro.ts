@@ -19,7 +19,7 @@ export type Opts={
     withTouchStartEvent?:boolean
 }
 
-export function guijarro(targetDiv:string, centerZone?:[number,number]):{
+export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[number,number]):{
     addMark:(lat:number,long:number,abr:string,title:string, template?:any)=>void
     addLayer:(url:string, stlye?:any)=>void
     colocarNodo:(nodo:Nodo)=>void
@@ -225,7 +225,7 @@ export function guijarro(targetDiv:string, centerZone?:[number,number]):{
 
     function posicionGPS(){
         var coordinates = geolocation.getPosition();
-        if(coordinates != null){
+        if(coordinates != null && leaveTrace){
             ultimaPosicion = ol.proj.transform(coordinates,projectionView,projectionCoor);
             if(posiciones.length){
                 colocarNodo(posiciones[posiciones.length-1]);
