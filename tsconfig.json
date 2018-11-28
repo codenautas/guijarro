@@ -5,9 +5,10 @@
         "allowUnreachableCode": false,
         "strict": true,
         "sourceMap": true,
+        "moduleResolution": "node",
         "declaration": true,
         "noImplicitAny": true,
-        "module": "none",
+        "module": "umd",
         "lib": [
             "dom", "es5"
         ]

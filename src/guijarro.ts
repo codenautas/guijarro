@@ -1,16 +1,15 @@
 /// /// <reference types="ol" />
 
-import * as bestGlobals from "best-globals";
+import {changing} from "best-globals";
 
-var changing = bestGlobals.changing;
-
-type Nodo={
+export type Nodo={
     posicion:[number,number]
     coordinates:[number,number]
     timestamp:number
+    more_info?:any
 }
 
-type Opts={
+export type Opts={
     letter:string, 
     position:string, 
     zoom:number|null, 
@@ -20,7 +19,7 @@ type Opts={
     withTouchStartEvent?:boolean
 }
 
-function guijarro(targetDiv:string, centerZone?:[number,number]):{
+export function guijarro(targetDiv:string, centerZone?:[number,number]):{
     addMark:(lat:number,long:number,abr:string,title:string, template?:any)=>void
     addLayer:(url:string, stlye?:any)=>void
     colocarNodo:(nodo:Nodo)=>void
