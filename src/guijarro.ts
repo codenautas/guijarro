@@ -1,4 +1,9 @@
 /// /// <reference types="ol" />
+
+import * as bestGlobals from "best-globals";
+
+var changing = bestGlobals.changing;
+
 type Nodo={
     posicion:[number,number]
     coordinates:[number,number]
@@ -95,7 +100,7 @@ function guijarro(targetDiv:string, centerZone?:[number,number]):{
 
     class UbicateControl extends ol.control.Control{
         constructor(opt_options:Opts){
-            var options = opt_options || {withTouchStartEvent:true};
+            var options = changing({withTouchStartEvent:true},opt_options);
             var button = document.createElement('button');
             button.textContent = options.letter;
         
