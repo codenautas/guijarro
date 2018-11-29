@@ -19,10 +19,10 @@ export type Opts={
     withTouchStartEvent?:boolean
 }
 
-export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[number,number]):{
+export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[number,number], epsilonShow:number=0):{
     addMark:(lat:number,long:number,abr:string,title:string, template?:any)=>void
     addLayer:(url:string, stlye?:any)=>void
-    colocarNodo:(nodo:Nodo)=>void
+    colocarNodo:(nodo:Nodo, ultimoNodoColocado: Nodo | null)=>Nodo
     addNodo:(nodo:Nodo)=>void
     addButton:(opts:Opts)=>void
     posiciones:Nodo[]
@@ -200,7 +200,10 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[numb
 
     var ultimaPosicion:[number, number];
 
-    function colocarNodo(nodo:Nodo){
+    function colocarNodo(nodo:Nodo, ultimoNodoColocado:Nodo|null):Nodo{
+        if(ultimoNodoColocado && Math.abs(nodo.coordinates[0] - ultimoNodoColocado.coordinates[0]) < epsilonShow && Math.abs(nodo.coordinates[1] - ultimoNodoColocado.coordinates[1]) < epsilonShow){
+            return ultimoNodoColocado;
+        }
         var positionFeature = new ol.Feature();
         positionFeature.setStyle(new ol.style.Style({
             image: new ol.style.Circle({
@@ -221,6 +224,7 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[numb
                 features: [positionFeature]
             })
         });
+        return nodo;
     }
 
     function posicionGPS(){
@@ -299,8 +303,9 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[numb
     if(aux != null){
         posiciones=JSON.parse(aux);
     }
+    var ultimoNodoColocado:Nodo|null;
     posiciones.forEach(function(nodo){
-        colocarNodo(nodo);
+        ultimoNodoColocado = colocarNodo(nodo, ultimoNodoColocado);
     })
 
     return {addMark:mark, addLayer, posiciones:posiciones, colocarNodo:colocarNodo, addNodo:addNodo, addButton:addButton};
