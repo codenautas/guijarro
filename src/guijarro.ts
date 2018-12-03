@@ -232,7 +232,7 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[numb
         if(coordinates != null && leaveTrace){
             ultimaPosicion = ol.proj.transform(coordinates,projectionView,projectionCoor);
             if(posiciones.length){
-                colocarNodo(posiciones[posiciones.length-1]);
+                ultimoNodoColocado = colocarNodo(posiciones[posiciones.length-1], ultimoNodoColocado);
             }
             var nodo = {posicion:ultimaPosicion, coordinates:coordinates, timestamp:new Date().getTime()};
             addNodo(nodo);
