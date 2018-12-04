@@ -155,6 +155,15 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[numb
         target:targetDiv,
         view:view
     });
+    var source = new ol.source.Vector({
+        wrapX: false
+    });
+    var vector = new ol.layer.Vector({
+        source: source
+    });
+    vector.setZIndex(9999);
+    map.addLayer(vector);
+    var ultimaPosicion:[number, number];
 
     function addButton(opts:Opts){
         map.controls.extend([
@@ -198,8 +207,6 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[numb
         return x as number;
     }
 
-    var ultimaPosicion:[number, number];
-
     function colocarNodo(nodo:Nodo, ultimoNodoColocado:Nodo|null):Nodo{
         if(ultimoNodoColocado && Math.abs(nodo.coordinates[0] - ultimoNodoColocado.coordinates[0]) < epsilonShow && Math.abs(nodo.coordinates[1] - ultimoNodoColocado.coordinates[1]) < epsilonShow){
             return ultimoNodoColocado;
@@ -218,12 +225,7 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[numb
             })
         }));
         positionFeature.setGeometry(new ol.geom.Point(nodo.coordinates));
-        new ol.layer.Vector({
-            map: map,
-            source: new ol.source.Vector({
-                features: [positionFeature]
-            })
-        });
+        source.addFeature(positionFeature)
         return nodo;
     }
 
@@ -292,7 +294,8 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[numb
                 extractStyles: false
             })
         });
-        let vector = new ol.layer.Vector({map, source, style:style || globalKmlStyle})
+        let vector = new ol.layer.Vector({map, source, style:style || globalKmlStyle});
+        vector.setZIndex(100);
         ubicateInZone = function(){
             var extent = source.getExtent();
             view.setCenter(ol.extent.getCenter(extent));
