@@ -19,12 +19,14 @@ export type Opts={
     withTouchStartEvent?:boolean
 }
 
-export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[number,number], epsilonShow:number=0):{
+export function guijarro(targetDiv:string, leaveTrace:boolean, epsilonShow:number=0, centerZone?:[number,number], currentZoom?:number):{
     addMark:(lat:number,long:number,abr:string,title:string, template?:any)=>void
     addLayer:(url:string, stlye?:any)=>void
     colocarNodo:(nodo:Nodo, ultimoNodoColocado: Nodo | null)=>Nodo
     addNodo:(nodo:Nodo)=>void
     addButton:(opts:Opts)=>void
+    getCenter:()=>[number,number]
+    getZoom:()=>number
     posiciones:Nodo[]
 }{
 
@@ -85,12 +87,13 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[numb
         })
     });
 
-    var center = latLon(-34.625, -58.445); 
+    var center = centerZone || latLon(-34.625, -58.445); 
+    var zoom = currentZoom || 12; 
 
     var view = new ol.View({
         projection: projectionView,
         center,
-        zoom: 12
+        zoom: zoom
     })
 
     var ubicateInZone = function(){
@@ -172,6 +175,14 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[numb
 
     }
 
+    function getCenter(){
+        return map.getView().getCenter();
+    }
+
+    function getZoom(){
+        return map.getView().getZoom();
+    }
+    
     function mark(lat:number,long:number,abr:string,title:string, className?:string){
         var element = document.createElement("div");
         element.className=className||"mark";
@@ -208,22 +219,40 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[numb
     }
 
     function colocarNodo(nodo:Nodo, ultimoNodoColocado:Nodo|null):Nodo{
-        if(ultimoNodoColocado && Math.abs(nodo.coordinates[0] - ultimoNodoColocado.coordinates[0]) < epsilonShow && Math.abs(nodo.coordinates[1] - ultimoNodoColocado.coordinates[1]) < epsilonShow){
+        var ignoreEpsilon = !!nodo.more_info;
+        if(!ignoreEpsilon && ultimoNodoColocado && Math.abs(nodo.coordinates[0] - ultimoNodoColocado.coordinates[0]) < epsilonShow && Math.abs(nodo.coordinates[1] - ultimoNodoColocado.coordinates[1]) < epsilonShow){
             return ultimoNodoColocado;
         }
         var positionFeature = new ol.Feature();
-        positionFeature.setStyle(new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: 4,
-                fill: new ol.style.Fill({
-                    color: '#6688DDFF',
-                }),
-                stroke: new ol.style.Stroke({
-                    color: '#0055FF',
-                    width: 1
+        var style;
+        if(ignoreEpsilon){
+            style = new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 4,
+                    fill: new ol.style.Fill({
+                        color: '#dd6666',
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#db1b1b',
+                        width: 1
+                    })
                 })
             })
-        }));
+        }else{
+            style= new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 4,
+                    fill: new ol.style.Fill({
+                        color: '#6688DD',
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#0055FF',
+                        width: 1
+                    })
+                })
+            })
+        }
+        positionFeature.setStyle(style);
         positionFeature.setGeometry(new ol.geom.Point(nodo.coordinates));
         source.addFeature(positionFeature)
         return nodo;
@@ -311,6 +340,6 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, centerZone?:[numb
         ultimoNodoColocado = colocarNodo(nodo, ultimoNodoColocado);
     })
 
-    return {addMark:mark, addLayer, posiciones:posiciones, colocarNodo:colocarNodo, addNodo:addNodo, addButton:addButton};
+    return {addMark:mark, addLayer, posiciones:posiciones, colocarNodo:colocarNodo, addNodo:addNodo, addButton:addButton, getCenter:getCenter, getZoom:getZoom};
 }
 

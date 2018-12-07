@@ -36,25 +36,31 @@ div#footer {
 #aviso_gps{
     color: gray;
 }
+
+.ol-control button {
+    height: 2.375em !important;
+    width: 2.375em !important;
+}
+
 .ubicate-control-Y {
-    top: 65px;
-    left: .5em;
-}
-.ol-touch .ubicate-control-Y {
-    top: 80px;
-}
-.ubicate-control-Z {
     top: 95px;
     left: .5em;
 }
+.ol-touch .ubicate-control-Y {
+    top: 140px;
+}
+.ubicate-control-Z {
+    top: 145px;
+    left: .5em;
+}
 .ol-touch .ubicate-control-Z {
-    top: 130px;
+    top: 200px;
 }
 .ubicate-control-C {
-    top: 125px;
+    top: 195px;
     left: .5em;
 }
 .ol-touch .ubicate-control-C {
-    top: 180px;
+    top: 260px;
 }
   
