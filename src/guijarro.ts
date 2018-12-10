@@ -236,7 +236,8 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, epsilonShow:numbe
                         color: '#db1b1b',
                         width: 1
                     })
-                })
+                }),
+                zIndex: 9999
             })
         }else{
             style= new ol.style.Style({
@@ -262,11 +263,20 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, epsilonShow:numbe
         var coordinates = geolocation.getPosition();
         if(coordinates != null && leaveTrace){
             ultimaPosicion = ol.proj.transform(coordinates,projectionView,projectionCoor);
+            var distanciaConNodoAnterior:number;
             if(posiciones.length){
+                distanciaConNodoAnterior = Math.sqrt(
+                    Math.pow((ultimoNodoColocado.coordinates[0] - coordinates[0]),2) + 
+                    Math.pow((ultimoNodoColocado.coordinates[1] - coordinates[1]),2)
+                );
                 ultimoNodoColocado = colocarNodo(posiciones[posiciones.length-1], ultimoNodoColocado);
+            }else{
+                distanciaConNodoAnterior = 9999;
             }
             var nodo = {posicion:ultimaPosicion, coordinates:coordinates, timestamp:new Date().getTime()};
-            addNodo(nodo);
+            if(distanciaConNodoAnterior > 1){
+                addNodo(nodo);
+            }
         }
     }
 
