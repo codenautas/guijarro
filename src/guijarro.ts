@@ -266,14 +266,15 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, epsilonShow:numbe
             var distanciaConNodoAnterior:number;
             if(posiciones.length){
                 distanciaConNodoAnterior = Math.sqrt(
-                    Math.pow((ultimoNodoColocado.coordinates[0] - coordinates[0]),2) + 
-                    Math.pow((ultimoNodoColocado.coordinates[1] - coordinates[1]),2)
+                    Math.pow((posiciones[posiciones.length-1].coordinates[0] - coordinates[0]),2) + 
+                    Math.pow((posiciones[posiciones.length-1].coordinates[1] - coordinates[1]),2)
                 );
                 ultimoNodoColocado = colocarNodo(posiciones[posiciones.length-1], ultimoNodoColocado);
             }else{
                 distanciaConNodoAnterior = 9999;
             }
             var nodo = {posicion:ultimaPosicion, coordinates:coordinates, timestamp:new Date().getTime()};
+            console.log("distancia: ", distanciaConNodoAnterior)
             if(distanciaConNodoAnterior > 1){
                 addNodo(nodo);
             }
