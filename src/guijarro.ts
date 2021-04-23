@@ -19,17 +19,42 @@ export type Opts={
     withTouchStartEvent?:boolean
 }
 
-export function guijarro(targetDiv:string, leaveTrace:boolean, epsilonShow:number=0, centerZone?:[number,number], currentZoom?:number):{
-    addMark:(lat:number,long:number,abr:string,title:string, template?:any)=>void
-    addLayer:(url:string, stlye?:any)=>void
-    colocarNodo:(nodo:Nodo, ultimoNodoColocado: Nodo | null)=>Nodo
-    addNodo:(nodo:Nodo)=>void
-    addButton:(opts:Opts)=>void
-    getCenter:()=>[number,number]
-    getZoom:()=>number
-    posiciones:Nodo[]
-}{
+export type GuijarroOpts={
+    centerZone?:[number,number], 
+    currentZoom?:number,
+    epsilonShow?:number,
+    storePointsFunctions?:{
+        get: (storageKey:string)=>Promise<Nodo[]>,
+        set: (storageKey:string,nodos:Nodo[])=>Promise<void>,
+    } | null
+}
 
+export async function guijarro(targetDiv:string, leaveTrace:boolean, opts?:GuijarroOpts):Promise<{
+    addMark: (lat: number, long: number, abr: string, title: string, template?: any) => void;
+    addLayer: (url: string, stlye?: any) => void;
+    colocarNodo: (nodo: Nodo, ultimoNodoColocado: Nodo | null) => Nodo;
+    addNodo: (nodo: Nodo) => Promise<void>;
+    addButton: (opts: Opts) => void;
+    getCenter: () => [number, number];
+    getZoom: () => number;
+    posiciones: Nodo[];
+}>{
+    var projectionCoor = ol.proj.get('EPSG:4326');
+    var projectionView = ol.proj.get('EPSG:3857');
+
+    function latLon(lat:number, long:number):[number, number]{
+        return ol.proj.transform([long, lat],projectionCoor,projectionView);
+    }
+    const defOptions:GuijarroOpts = {
+        epsilonShow:0,
+        centerZone: latLon(-34.625, -58.445),
+        currentZoom: 12,
+        storePointsFunctions:null
+    };
+    opts = changing(defOptions,opts || {}) as GuijarroOpts;
+    
+    var { centerZone, currentZoom, epsilonShow, storePointsFunctions } = opts;
+    const STORAGE_KEY = "mapa-posiciones";
     var template = {
         strokeColor: "#0000FF",
         strokeOpacity: 1,
@@ -55,14 +80,6 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, epsilonShow:numbe
     };
 
     var posiciones:Nodo[]=[];
-
-    var projectionCoor = ol.proj.get('EPSG:4326');
-    var projectionView = ol.proj.get('EPSG:3857');
-
-    function latLon(lat:number, long:number):[number, number]{
-        return ol.proj.transform([long, lat],projectionCoor,projectionView);
-    }
-
     var baseMap = new ol.layer.Tile({
         source: new ol.source.OSM()
     });
@@ -87,8 +104,8 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, epsilonShow:numbe
         })
     });
 
-    var center = centerZone || latLon(-34.625, -58.445); 
-    var zoom = currentZoom || 12; 
+    var center = centerZone;
+    var zoom = currentZoom;
 
     var view = new ol.View({
         projection: projectionView,
@@ -259,7 +276,7 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, epsilonShow:numbe
         return nodo;
     }
 
-    function posicionGPS(){
+    async function posicionGPS(){
         var coordinates = geolocation.getPosition();
         if(coordinates != null && leaveTrace){
             ultimaPosicion = ol.proj.transform(coordinates,projectionView,projectionCoor);
@@ -276,14 +293,17 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, epsilonShow:numbe
             var nodo = {posicion:ultimaPosicion, coordinates:coordinates, timestamp:new Date().getTime()};
             console.log("distancia: ", distanciaConNodoAnterior)
             if(distanciaConNodoAnterior > 1){
-                addNodo(nodo);
+                await addNodo(nodo);
             }
         }
     }
 
-    function addNodo(nodo:Nodo){
+    async function addNodo(nodo:Nodo){
         posiciones.push(nodo);
-        localStorage.setItem("mapa-posiciones",JSON.stringify(posiciones));
+        storePointsFunctions?.set?
+            await storePointsFunctions.set(STORAGE_KEY, posiciones)
+        :
+            localStorage.setItem(STORAGE_KEY,JSON.stringify(posiciones));
     }
 
     function cantidadGPS(){
@@ -342,9 +362,12 @@ export function guijarro(targetDiv:string, leaveTrace:boolean, epsilonShow:numbe
         }
     }
 
-    var aux = localStorage.getItem("mapa-posiciones");
+    var aux = storePointsFunctions?.get?
+        await storePointsFunctions.get(STORAGE_KEY)
+    :
+        localStorage.getItem(STORAGE_KEY)?JSON.parse(localStorage.getItem(STORAGE_KEY)!):null;
     if(aux != null){
-        posiciones=JSON.parse(aux);
+        posiciones=aux;
     }
     var ultimoNodoColocado:Nodo|null;
     posiciones.forEach(function(nodo){

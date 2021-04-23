@@ -10,7 +10,7 @@
         "noImplicitAny": true,
         "module": "umd",
         "lib": [
-            "dom", "es5"
+            "dom", "es5", "es2015"
         ]
     },
     "files": [
