@@ -235,6 +235,33 @@ export async function guijarro(targetDiv:string, leaveTrace:boolean, opts?:Guija
         return x as number;
     }
 
+    const redStyle = new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 4,
+            fill: new ol.style.Fill({
+                color: '#dd6666',
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#db1b1b',
+                width: 1
+            })
+        }),
+        zIndex: 9999
+    });
+
+    const blueStyle = new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 4,
+            fill: new ol.style.Fill({
+                color: '#6688DD',
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#0055FF',
+                width: 1
+            })
+        })
+    })
+
     function colocarNodo(nodo:Nodo, ultimoNodoColocado:Nodo|null):Nodo{
         var ignoreEpsilon = !!nodo.more_info;
         if(!ignoreEpsilon && ultimoNodoColocado && Math.abs(nodo.coordinates[0] - ultimoNodoColocado.coordinates[0]) < epsilonShow && Math.abs(nodo.coordinates[1] - ultimoNodoColocado.coordinates[1]) < epsilonShow){
@@ -243,32 +270,9 @@ export async function guijarro(targetDiv:string, leaveTrace:boolean, opts?:Guija
         var positionFeature = new ol.Feature();
         var style;
         if(ignoreEpsilon){
-            style = new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 4,
-                    fill: new ol.style.Fill({
-                        color: '#dd6666',
-                    }),
-                    stroke: new ol.style.Stroke({
-                        color: '#db1b1b',
-                        width: 1
-                    })
-                }),
-                zIndex: 9999
-            })
+            style = redStyle;
         }else{
-            style= new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 4,
-                    fill: new ol.style.Fill({
-                        color: '#6688DD',
-                    }),
-                    stroke: new ol.style.Stroke({
-                        color: '#0055FF',
-                        width: 1
-                    })
-                })
-            })
+            style = blueStyle;
         }
         positionFeature.setStyle(style);
         positionFeature.setGeometry(new ol.geom.Point(nodo.coordinates));
